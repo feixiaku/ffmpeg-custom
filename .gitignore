@@ -36,4 +36,9 @@
 /lcov/
 /src
 /mapfile
+
 /output/*
+*.pnm
+*.png
+*.c.swo
+tags

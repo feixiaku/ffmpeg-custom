@@ -423,8 +423,9 @@ OBJS-$(CONFIG_SPECTRUMSYNTH_FILTER)          += vaf_spectrumsynth.o
 OBJS-$(CONFIG_AMOVIE_FILTER)                 += src_movie.o
 OBJS-$(CONFIG_MOVIE_FILTER)                  += src_movie.o
 
-# feixiaku's filter
-OBJS-$(CONFIG_FEIXIAKU_TRANSFORM_FILTER)	 += vf_feixiaku_transform.o
+# feixiaku custom filter
+#OBJS-$(CONFIG_FEIXIAKU_TRANSFORM_FILTER)	 += vf_feixiaku_transform.o
+OBJS-$(CONFIG_FOOBAR_FILTER)             	 += vf_foobar.o
 
 # Windows resource file
 SLIBOBJS-$(HAVE_GNU_WINDRES)                 += avfilterres.o
