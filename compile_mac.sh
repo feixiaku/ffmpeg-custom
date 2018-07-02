@@ -2,4 +2,11 @@
 
 make clean
 
-./configure --enable-shared --disable-static --prefix=output/mac
+./configure \
+    --enable-debug=3 \
+    --disable-optimizations \
+    --disable-asm \
+    --disable-stripping \
+    --enable-shared \
+    --disable-static \
+    --prefix=output/mac
