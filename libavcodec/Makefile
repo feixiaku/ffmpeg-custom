@@ -1071,6 +1071,9 @@ OBJS-$(CONFIG_VP9_RAW_REORDER_BSF)        += vp9_raw_reorder_bsf.o
 OBJS-$(CONFIG_VP9_SUPERFRAME_BSF)         += vp9_superframe_bsf.o
 OBJS-$(CONFIG_VP9_SUPERFRAME_SPLIT_BSF)   += vp9_superframe_split_bsf.o
 
+#feixiaku custom codec
+OBJS-$(CONFIG_DUMMY_DECODER)            += dummyDecoder.o
+
 # thread libraries
 OBJS-$(HAVE_LIBC_MSVCRT)               += file_open.o
 OBJS-$(HAVE_THREADS)                   += pthread.o pthread_slice.o pthread_frame.o

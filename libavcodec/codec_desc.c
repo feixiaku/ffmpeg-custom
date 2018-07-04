@@ -3122,6 +3122,13 @@ static const AVCodecDescriptor codec_descriptors[] = {
         .long_name = NULL_IF_CONFIG_SMALL("AVFrame to AVPacket passthrough"),
         .props     = AV_CODEC_PROP_LOSSLESS,
     },
+    {
+        .id        = AV_CODEC_ID_DUMMY,
+        .type      = AVMEDIA_TYPE_VIDEO,
+        .name      = "dummy",
+        .long_name = NULL_IF_CONFIG_SMALL("dummy custom decoder"),
+        .props     = AV_CODEC_PROP_INTRA_ONLY | AV_CODEC_PROP_LOSSLESS,
+    },
 };
 
 static int descriptor_compare(const void *key, const void *member)
