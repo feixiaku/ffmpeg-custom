@@ -215,7 +215,6 @@
 enum AVCodecID {
     AV_CODEC_ID_NONE,
 
-    AV_CODEC_ID_DUMMY, // custom codec ID
     /* video codecs */
     AV_CODEC_ID_MPEG1VIDEO,
     AV_CODEC_ID_MPEG2VIDEO, ///< preferred ID for MPEG-1/2 video decoding
@@ -691,6 +690,8 @@ enum AVCodecID {
     AV_CODEC_ID_FFMETADATA = 0x21000,   ///< Dummy codec for streams containing only metadata information.
     AV_CODEC_ID_WRAPPED_AVFRAME = 0x21001, ///< Passthrough codec, AVFrames wrapped in AVPacket
 
+    // custom codec ID
+    AV_CODEC_ID_DUMMY,
 };
 
 /**
