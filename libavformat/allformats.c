@@ -487,6 +487,7 @@ extern AVInputFormat  ff_vapoursynth_demuxer;
 
 //custom muxer
 extern AVOutputFormat ff_dummy_muxer;
+extern AVInputFormat  ff_dummy_demuxer;
 
 #include "libavformat/muxer_list.c"
 #include "libavformat/demuxer_list.c"

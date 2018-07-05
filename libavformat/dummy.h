@@ -7,5 +7,6 @@
 #define AVFORMAT_DUMMY_H
 
 #include "avformat.h"
+#include "libavutil/opt.h"
 
 #endif
