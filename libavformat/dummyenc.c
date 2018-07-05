@@ -7,6 +7,7 @@
 
 static int dummy_write_header(AVFormatContext *fmt)
 {
+    av_log(NULL, AV_LOG_WARNING, "dummy write header!");
     //write your self format header
     return 0;
 }
@@ -14,12 +15,15 @@ static int dummy_write_header(AVFormatContext *fmt)
 static int dummy_write_packet(AVFormatContext *fmt, AVPacket *pkt)
 {
     //use file protocol write file
+    av_log(NULL, AV_LOG_WARNING, "dummy write packet %s, codec ID: %d",
+            (fmt->streams[0]->codec->codec->name), fmt->video_codec_id);
     avio_write(fmt->pb, pkt->data, pkt->size);
     return 0;
 }
 
 static int dummy_write_trailer(AVFormatContext *fmt)
 {
+    av_log(NULL, AV_LOG_WARNING, "dummy write trailer!");
     //write your self format trailer
     return 0;
 }

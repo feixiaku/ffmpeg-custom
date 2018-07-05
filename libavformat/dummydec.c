@@ -15,11 +15,13 @@ typedef struct DummyDemuxerContext{
 static int dummy_probe(AVProbeData *p)
 {
     //compare key words
-    return 0;
+    av_log(NULL, AV_LOG_WARNING, "Dummy demuxer dummy_probe!\n");
+    return AVPROBE_SCORE_MAX;
 }
 
 static int dummy_read_header(AVFormatContext *s)
 {
+    av_log(NULL, AV_LOG_WARNING, "Dummy demuxer read_header!\n");
     DummyDemuxerContext *dummyCtx = s->priv_data;
     enum AVPixelFormat pix_fmt;
     AVStream *st;
@@ -27,7 +29,7 @@ static int dummy_read_header(AVFormatContext *s)
     st = avformat_new_stream(s, NULL);
     if(!st)
     {
-        av_log(NULL, AV_LOG_ERROR, "dummy demuxer read header error");
+        av_log(NULL, AV_LOG_ERROR, "dummy demuxer read header error\n");
         return AVERROR(ENOMEM);
     }
 
@@ -49,24 +51,31 @@ static int dummy_read_header(AVFormatContext *s)
     tmpRation.den = 1;
     tmpRation.num = 8;
 
-    st->codec->bit_rate = av_rescale_q(avpicture_get_size(st->codec->pix_fmt,
-                                                                dummyCtx->width, dummyCtx->height),
-                                      tmpRation,
-                                      st->time_base);
+    st->codec->bit_rate = av_rescale_q(
+            avpicture_get_size(st->codec->pix_fmt, dummyCtx->width, dummyCtx->height),
+            tmpRation,
+            st->time_base);
+    av_log(NULL, AV_LOG_WARNING, "Dummy demuxer bit rate: %d, width: %d, height: %d, codec ID: %d\n",
+            st->codec->bit_rate, dummyCtx->width, dummyCtx->height, st->codec->codec_id);
     return 0;
 }
 
 static int dummy_read_packet(AVFormatContext *s, AVPacket *pkt)
 {
+    av_log(NULL, AV_LOG_WARNING, "Dummy demuxer read_packet!\n");
     int packet_size, ret, width, height;
     AVStream *st = s->streams[0];
 
+    st->codec->codec_id = s->iformat->raw_codec_id;
     width   = st->codec->width;
     height  = st->codec->height;
 
+    av_log(NULL, AV_LOG_WARNING, "read packet width: %d, height: %d, get packet size %d, stream number: %d, Codec ID: %d\n",
+            width, height, packet_size, s->nb_streams, st->codec->codec_id);
     packet_size = avpicture_get_size(st->codec->pix_fmt, width, height);
     if(packet_size < 0)
     {
+        av_log(NULL, AV_LOG_WARNING, "Dummy demuxer get packet size %d\n", packet_size);
         return -1;
     }
 
@@ -82,6 +91,7 @@ static int dummy_read_packet(AVFormatContext *s, AVPacket *pkt)
 
 static int dummy_read_close(AVFormatContext *s)
 {
+    av_log(NULL, AV_LOG_WARNING, "Dummy demuxer read_close!\n");
     //free some resource
     return 0;
 }
@@ -106,15 +116,15 @@ static const AVClass dummy_demuxer_class = {
 AVInputFormat ff_dummy_demuxer = {
     .name           = "dummy",
     .long_name      = NULL_IF_CONFIG_SMALL("dummy demuxer"),
-    .mime_type      = "dummy/x-demmyvideo",
+    .flags          = AVFMT_GENERIC_INDEX,
     .extensions     = "dummy",
 
     .priv_class     = &dummy_demuxer_class,
     .priv_data_size = sizeof(DummyDemuxerContext),
     .raw_codec_id   = AV_CODEC_ID_RAWVIDEO,
 
-    .read_probe     = dummy_probe,
+    //.read_probe     = dummy_probe,
     .read_header    = dummy_read_header,
     .read_packet    = dummy_read_packet,
-    .read_close     = dummy_read_close,
+    //.read_close     = dummy_read_close,
 };
