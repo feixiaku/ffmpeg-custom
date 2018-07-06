@@ -33,30 +33,31 @@ static int dummy_read_header(AVFormatContext *s)
         return AVERROR(ENOMEM);
     }
 
-    st->codec->codec_type = AVMEDIA_TYPE_VIDEO;
-    st->codec->codec_id = s->iformat->raw_codec_id;
+    st->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
+    st->codecpar->codec_id = s->iformat->raw_codec_id;
 
     //hardcode pixel format
     pix_fmt = AV_PIX_FMT_YUV420P;
 
-    st->time_base.num = dummyCtx->framerate.num;
-    st->time_base.den = dummyCtx->framerate.den;
+    //st->time_base.num = dummyCtx->framerate.num;
+    //st->time_base.den = dummyCtx->framerate.den;
     st->pts_wrap_bits = 64;
+    avpriv_set_pts_info(st, 64, s->framerate.den, s->framerate.num);
 
-    st->codec->width    = dummyCtx->width;
-    st->codec->height   = dummyCtx->height;
-    st->codec->pix_fmt  = pix_fmt;
+    st->codecpar->width    = dummyCtx->width;
+    st->codecpar->height   = dummyCtx->height;
+    st->codecpar->format   = pix_fmt;
 
     AVRational tmpRation;
     tmpRation.den = 1;
-    tmpRation.num = 8;
+    tmpRation.num = 1000000;
 
     st->codec->bit_rate = av_rescale_q(
             avpicture_get_size(st->codec->pix_fmt, dummyCtx->width, dummyCtx->height),
             tmpRation,
             st->time_base);
-    av_log(NULL, AV_LOG_WARNING, "Dummy demuxer bit rate: %d, width: %d, height: %d, codec ID: %d\n",
-            st->codec->bit_rate, dummyCtx->width, dummyCtx->height, st->codec->codec_id);
+    //av_log(NULL, AV_LOG_WARNING, "Dummy demuxer bit rate: %d, width: %d, height: %d, codec ID: %d\n",
+    //        st->codec->bit_rate, dummyCtx->width, dummyCtx->height, st->codec->codec_id);
     return 0;
 }
 
@@ -66,12 +67,12 @@ static int dummy_read_packet(AVFormatContext *s, AVPacket *pkt)
     int packet_size, ret, width, height;
     AVStream *st = s->streams[0];
 
-    st->codec->codec_id = s->iformat->raw_codec_id;
-    width   = st->codec->width;
-    height  = st->codec->height;
+    st->codecpar->codec_id = s->iformat->raw_codec_id;
+    width   = st->codecpar->width;
+    height  = st->codecpar->height;
 
-    av_log(NULL, AV_LOG_WARNING, "read packet width: %d, height: %d, get packet size %d, stream number: %d, Codec ID: %d\n",
-            width, height, packet_size, s->nb_streams, st->codec->codec_id);
+    //av_log(NULL, AV_LOG_WARNING, "read packet width: %d, height: %d, get packet size %d, stream number: %d, Codec ID: %d\n",
+    //        width, height, packet_size, s->nb_streams, st->codec->codec_id);
     packet_size = avpicture_get_size(st->codec->pix_fmt, width, height);
     if(packet_size < 0)
     {
@@ -79,8 +80,13 @@ static int dummy_read_packet(AVFormatContext *s, AVPacket *pkt)
         return -1;
     }
 
+    if(s->packet_size == NULL){
+
+        av_log(NULL, AV_LOG_WARNING, "packet_size\n");
+    }
     ret = av_get_packet(s->pb, pkt, packet_size);
     pkt->pts = pkt->dts = pkt->pos / packet_size;
+    av_log(NULL, AV_LOG_WARNING, "pkt->pts: %lld\n", pkt->pts);
 
     pkt->stream_index = 0;
     if(ret < 0)
@@ -98,11 +104,10 @@ static int dummy_read_close(AVFormatContext *s)
 
 #define OFFSET(x) offsetof(DummyDemuxerContext, x)
 #define DEC AV_OPT_FLAG_DECODING_PARAM
-static const AVOption dummy_options[] =
-{
+static const AVOption dummy_options[] = {
     { "video_size", "set frame size", OFFSET(width), AV_OPT_TYPE_IMAGE_SIZE, {.str = NULL}, 0, 0, DEC },
     { "pixel_format", "set pixel format", OFFSET(pixel_format), AV_OPT_TYPE_STRING, {.str = "yuv420p"}, 0, 0, DEC },
-    { "framerate", "set frame rate", OFFSET(framerate), AV_OPT_TYPE_VIDEO_RATE, {.str = "25"}, 0, 0, DEC },
+    { "framerate", "set frame rate", OFFSET(framerate), AV_OPT_TYPE_VIDEO_RATE, {.str = "25"}, 0, INT_MAX, DEC },
     { NULL },
 };
 
@@ -126,5 +131,5 @@ AVInputFormat ff_dummy_demuxer = {
     //.read_probe     = dummy_probe,
     .read_header    = dummy_read_header,
     .read_packet    = dummy_read_packet,
-    //.read_close     = dummy_read_close,
+    .read_close     = dummy_read_close,
 };

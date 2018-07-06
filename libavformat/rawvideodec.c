@@ -77,6 +77,7 @@ static int rawvideo_read_packet(AVFormatContext *s, AVPacket *pkt)
 
     ret = av_get_packet(s->pb, pkt, s->packet_size);
     pkt->pts = pkt->dts = pkt->pos / s->packet_size;
+    av_log(NULL, AV_LOG_WARNING, "pkt-pts: %lld\n", pkt->pts);
 
     pkt->stream_index = 0;
     if (ret < 0)
