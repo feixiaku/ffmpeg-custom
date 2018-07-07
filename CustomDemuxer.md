@@ -19,4 +19,5 @@ FFmpeg-Custom is a tutorial for learning how to custom Demuxer/Codec/Filter.
         Usage:
         ffmpeg -i input.mp4 -vf foobar output.mp4
 
-Contact: feixiaku@gmail.com
+##Contact: 
+E-mail: feixiaku@gmail.com
