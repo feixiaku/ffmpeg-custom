@@ -25,6 +25,7 @@ static int dummy_read_header(AVFormatContext *s)
     DummyDemuxerContext *dummyCtx = s->priv_data;
     enum AVPixelFormat pix_fmt;
     AVStream *st;
+    int packet_size;
 
     st = avformat_new_stream(s, NULL);
     if(!st)
@@ -37,27 +38,48 @@ static int dummy_read_header(AVFormatContext *s)
     st->codecpar->codec_id = s->iformat->raw_codec_id;
 
     //hardcode pixel format
-    pix_fmt = AV_PIX_FMT_YUV420P;
+    if(pix_fmt == AV_PIX_FMT_NONE)
+    {
+        pix_fmt = AV_PIX_FMT_YUV420P;
+    }else{
+        pix_fmt = av_get_pix_fmt(dummyCtx->pixel_format);
+        if(pix_fmt == AV_PIX_FMT_NONE)
+        {
+            av_log(NULL, AV_LOG_ERROR, "No such pixel format: %s.\n", dummyCtx->pixel_format);
+            return;
+        }
+    }
+    av_log(NULL, AV_LOG_WARNING, "pix_fmt: %d\n", pix_fmt);
 
     //st->time_base.num = dummyCtx->framerate.num;
     //st->time_base.den = dummyCtx->framerate.den;
     st->pts_wrap_bits = 64;
-    avpriv_set_pts_info(st, 64, s->framerate.den, s->framerate.num);
+    avpriv_set_pts_info(st, 64, dummyCtx->framerate.den, dummyCtx->framerate.num);
 
     st->codecpar->width    = dummyCtx->width;
     st->codecpar->height   = dummyCtx->height;
     st->codecpar->format   = pix_fmt;
 
     AVRational tmpRation;
+    tmpRation.num = 8;
     tmpRation.den = 1;
-    tmpRation.num = 1000000;
 
-    st->codec->bit_rate = av_rescale_q(
-            avpicture_get_size(st->codec->pix_fmt, dummyCtx->width, dummyCtx->height),
+    packet_size = avpicture_get_size(st->codecpar->format, dummyCtx->width, dummyCtx->height);
+    //av_log(NULL, AV_LOG_WARNING, "packet_size: %d\n", packet_size);
+    if(packet_size < 0)
+        return packet_size;
+
+    s->packet_size = packet_size;
+
+    //av_resacle_q(a,b,c): a*b/c
+    st->codecpar->bit_rate = av_rescale_q(
+            packet_size,
             tmpRation,
             st->time_base);
+    //av_log(NULL, AV_LOG_WARNING, "st->time_base: %d\n", st->time_base);
     //av_log(NULL, AV_LOG_WARNING, "Dummy demuxer bit rate: %d, width: %d, height: %d, codec ID: %d\n",
     //        st->codec->bit_rate, dummyCtx->width, dummyCtx->height, st->codec->codec_id);
+
     return 0;
 }
 
@@ -80,13 +102,9 @@ static int dummy_read_packet(AVFormatContext *s, AVPacket *pkt)
         return -1;
     }
 
-    if(s->packet_size == NULL){
-
-        av_log(NULL, AV_LOG_WARNING, "packet_size\n");
-    }
     ret = av_get_packet(s->pb, pkt, packet_size);
     pkt->pts = pkt->dts = pkt->pos / packet_size;
-    av_log(NULL, AV_LOG_WARNING, "pkt->pts: %lld\n", pkt->pts);
+    //av_log(NULL, AV_LOG_WARNING, "pkt->pts: %lld\n", pkt->pts);
 
     pkt->stream_index = 0;
     if(ret < 0)

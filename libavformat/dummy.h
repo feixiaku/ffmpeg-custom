@@ -7,6 +7,8 @@
 #define AVFORMAT_DUMMY_H
 
 #include "avformat.h"
+#include "libavformat/internal.h"
 #include "libavutil/opt.h"
+#include "libavutil/pixdesc.h"
 
 #endif
